@@ -20,7 +20,6 @@ app = FastAPI(
     title="Crop Disease Doctor API",
     description="AI-powered backend for crop disease detection and advisory",
     version="1.0.0"
-    root_path="/api"
 )
 
 # Enable CORS (allow all for development)
