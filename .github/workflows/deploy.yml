@@ -1,4 +1,4 @@
-name: Deploy Crop Disease Doctor API
+name: Deploy Docker App to EC2
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Login to Docker Hub
@@ -21,14 +21,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          cd /home/ubuntu/RAG-project || exit 1
           docker build -t syedmawahid/crop-disease-doctor:latest .
 
       - name: Push Docker image
         run: |
           docker push syedmawahid/crop-disease-doctor:latest
 
-      - name: Deploy on server via SSH
+      - name: Deploy on EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
