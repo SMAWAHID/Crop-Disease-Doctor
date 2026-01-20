@@ -21,14 +21,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build \
-            -t syedmawahid/crop-disease-doctor:latest \
-            -f backend/Dockerfile \
-            backend
+          sudo docker build -t syedmawahid/crop-disease-doctor:latest .
 
       - name: Push Docker image
         run: |
-          docker push syedmawahid/crop-disease-doctor:latest
+          sudo docker push syedmawahid/crop-disease-doctor:latest
 
       - name: Deploy on server via SSH
         uses: appleboy/ssh-action@v1.0.3
