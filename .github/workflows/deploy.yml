@@ -18,6 +18,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Debug Dockerfile
         run: |
           pwd
@@ -40,10 +41,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             sudo docker pull syedmawahid/crop-disease-doctor:latest
-            sudo docker stop crop-api || true
-            sudo docker rm crop-api || true
+            sudo docker stop crop_disease_doctor || true
+            sudo docker rm crop_disease_doctor || true
             sudo docker run -d \
-              --name crop-api \
+              --name crop_disease_doctor \
               -p 8000:8000 \
               --restart unless-stopped \
               syedmawahid/crop-disease-doctor:latest
