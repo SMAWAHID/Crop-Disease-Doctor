@@ -21,7 +21,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          cd RAG-project
+          cd /home/ubuntu/RAG-project || exit 1
           docker build -t syedmawahid/crop-disease-doctor:latest .
 
       - name: Push Docker image
