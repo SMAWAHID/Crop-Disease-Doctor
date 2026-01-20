@@ -1,4 +1,4 @@
-name: Deploy Crop API
+name: Deploy Crop Disease Doctor API
 
 on:
   push:
@@ -21,11 +21,14 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t syedmawahid/crop-api:latest .
+          docker build \
+            -t syedmawahid/crop-disease-doctor:latest \
+            -f backend/Dockerfile \
+            backend
 
       - name: Push Docker image
         run: |
-          docker push syedmawahid/crop-api:latest
+          docker push syedmawahid/crop-disease-doctor:latest
 
       - name: Deploy on server via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -34,11 +37,11 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            docker pull syedmawahid/crop-api:latest
-            docker stop crop-api || true
-            docker rm crop-api || true
-            docker run -d \
+            sudo docker pull syedmawahid/crop-disease-doctor:latest
+            sudo docker stop crop-api || true
+            sudo docker rm crop-api || true
+            sudo docker run -d \
               --name crop-api \
               -p 8000:8000 \
               --restart unless-stopped \
-              syedmawahid/crop-api:latest
+              syedmawahid/crop-disease-doctor:latest
