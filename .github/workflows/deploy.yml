@@ -1,0 +1,44 @@
+name: Deploy Crop API
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t yourdockerhub/crop-api:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push yourdockerhub/crop-api:latest
+
+      - name: Deploy on server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            docker pull yourdockerhub/crop-api:latest
+            docker stop crop-api || true
+            docker rm crop-api || true
+            docker run -d \
+              --name crop-api \
+              -p 8000:8000 \
+              --restart unless-stopped \
+              yourdockerhub/crop-api:latest
