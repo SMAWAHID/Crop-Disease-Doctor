@@ -39,6 +39,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
+          command_timeout: 30m
           script: |
             sudo docker pull syedmawahid/crop-disease-doctor:latest
             sudo docker stop crop_disease_doctor || true
