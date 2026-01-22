@@ -42,22 +42,14 @@ app.add_middleware(
 # -----------------------
 
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
-<<<<<<< HEAD
-assets_path = os.path.join(frontend_path, "assets")
-if os.path.exists(frontend_path) and os.path.exists(assets_path):
-    app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
-=======
 if os.path.exists(frontend_path):
-    app.mount(
-        "/assets",
-        StaticFiles(directory=os.path.join(frontend_path, "assets")),
-        name="assets",
-    )
+    assets_path = os.path.join(frontend_path, "assets")
+    if os.path.exists(assets_path):
+        app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
 
 # -----------------------
 # Global agent
 # -----------------------
->>>>>>> d858840f77d458858f946dc56648acfc05556d82
 
 agent: Optional[SupervisorAgent] = None
 
