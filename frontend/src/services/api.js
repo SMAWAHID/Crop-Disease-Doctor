@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
+// IMPORTANT:
+// In production, frontend must call backend via Caddy using /api
+// NEVER use localhost or 127.0.0.1 in browser code
+
+const API_BASE_URL = '/api';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -11,7 +15,7 @@ const api = axios.create({
 
 export const checkHealth = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/api/health`);
+        const response = await api.get('/health');
         return response.data;
     } catch (error) {
         console.error('API Connect Error:', error);
@@ -22,6 +26,7 @@ export const checkHealth = async () => {
 export const analyzeImage = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
+
     const response = await api.post('/analyze/image', formData);
     return response.data;
 };
@@ -29,6 +34,7 @@ export const analyzeImage = async (file) => {
 export const chatQuery = async (query) => {
     const formData = new FormData();
     formData.append('query', query);
+
     const response = await api.post('/chat', formData);
     return response.data;
 };
@@ -36,6 +42,7 @@ export const chatQuery = async (query) => {
 export const analyzeVoice = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
+
     const response = await api.post('/analyze/voice', formData);
     return response.data;
 };
