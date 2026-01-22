@@ -23,7 +23,10 @@ const UnifiedChat = () => {
     });
 
     const [currentSessionId, setCurrentSessionId] = useState(chatSessions[0].id);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(() => {
+        // Always open on desktop, closed on mobile
+        return window.innerWidth > 768;
+    });
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
@@ -41,6 +44,20 @@ const UnifiedChat = () => {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [currentSession?.messages]);
+
+    // Handle responsive sidebar
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 768) {
+                setSidebarOpen(true);
+            } else {
+                setSidebarOpen(false);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Auto-send voice message when recording stops and blob is available
     useEffect(() => {
