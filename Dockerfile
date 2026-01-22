@@ -1,3 +1,23 @@
+# Multi-stage build for Crop Disease Doctor
+
+# Stage 1: Build the React frontend
+FROM node:20-slim AS frontend-builder
+
+WORKDIR /frontend
+
+# Copy frontend package files
+COPY frontend/package*.json ./
+
+# Install dependencies
+RUN npm ci --legacy-peer-deps
+
+# Copy frontend source code
+COPY frontend/ .
+
+# Build the production frontend
+RUN npm run build
+
+# Stage 2: Python backend with frontend
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -12,7 +32,12 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy app code
-COPY . .
+COPY src/ ./src/
+COPY class_index.json .
+COPY best_model_mobilenet.pt .
+
+# Copy built frontend from Stage 1
+COPY --from=frontend-builder /frontend/dist ./frontend/dist
 
 EXPOSE 8000
 
