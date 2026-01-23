@@ -39,6 +39,7 @@ jobs:
 
             echo "🎨 Building frontend"
             cd frontend
+            npm ci --legacy-peer-deps
             npm install
             npm run build
             cd ..
