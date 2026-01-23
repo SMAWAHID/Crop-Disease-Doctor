@@ -1,4 +1,4 @@
-name: Deploy Backend with PM2 to EC2
+name: Deploy Backend and Frontend with PM2 to EC2
 
 on:
   push:
@@ -24,30 +24,33 @@ jobs:
             set -e
 
             echo "🚀 Connected to EC2"
-
             cd /home/ubuntu/RAG-project
 
             echo "📥 Pulling latest code"
-            git pull origin main
+            git pull --rebase origin main
 
-            echo "🐍 Preparing virtual environment"
+            echo "🐍 Backend setup"
             if [ ! -d "venv" ]; then
               python3 -m venv venv
             fi
             source venv/bin/activate
-
-            echo "📦 Installing Python dependencies"
             pip install --upgrade pip
             pip install -r requirements.txt
 
-            echo "🔧 Making start.sh executable"
+            echo "🎨 Building frontend"
+            cd frontend
+            npm install
+            npm run build
+            cd ..
+
+            echo "🚚 Deploying frontend to Caddy"
+            sudo rm -rf /var/www/cropdiseasedoctor/*
+            sudo cp -r frontend/dist/* /var/www/cropdiseasedoctor/
+            sudo chown -R caddy:caddy /var/www/cropdiseasedoctor
+
+            echo "♻ Restarting backend with PM2"
             chmod +x start.sh
-
-            echo "♻ Restarting application with PM2"
-            pm2 delete crop-disease-doctor || true
-            pm2 start ./start.sh --name crop-disease-doctor
-
-            echo "💾 Saving PM2 process list"
+            pm2 restart crop-disease-doctor || pm2 start ./start.sh --name crop-disease-doctor
             pm2 save
 
             echo "✅ Deployment completed successfully"
