@@ -1,4 +1,4 @@
-name: Deploy Docker App to EC2
+name: Deploy Backend with PM2 to EC2
 
 on:
   push:
@@ -6,34 +6,14 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Debug Dockerfile
-        run: |
-          pwd
-          ls -la
-          find . -maxdepth 2 -iname "dockerfile*"
-
-      - name: Build Docker image
-        run: |
-          docker build -t syedmawahid/crop-disease-doctor:latest .
-
-      - name: Push Docker image
-        run: |
-          docker push syedmawahid/crop-disease-doctor:latest
-
-      - name: Deploy on EC2 via SSH
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
@@ -41,11 +21,33 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           command_timeout: 30m
           script: |
-            sudo docker pull syedmawahid/crop-disease-doctor:latest
-            sudo docker stop crop_disease_doctor || true
-            sudo docker rm crop_disease_doctor || true
-            sudo docker run -d \
-              --name crop_disease_doctor \
-              -p 8000:8000 \
-              --restart unless-stopped \
-              syedmawahid/crop-disease-doctor:latest
+            set -e
+
+            echo "🚀 Connected to EC2"
+
+            cd /home/ubuntu/RAG-project
+
+            echo "📥 Pulling latest code"
+            git pull origin main
+
+            echo "🐍 Preparing virtual environment"
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
+            source venv/bin/activate
+
+            echo "📦 Installing Python dependencies"
+            pip install --upgrade pip
+            pip install -r requirements.txt
+
+            echo "🔧 Making start.sh executable"
+            chmod +x start.sh
+
+            echo "♻ Restarting application with PM2"
+            pm2 delete crop-disease-doctor || true
+            pm2 start ./start.sh --name crop-disease-doctor
+
+            echo "💾 Saving PM2 process list"
+            pm2 save
+
+            echo "✅ Deployment completed successfully"
